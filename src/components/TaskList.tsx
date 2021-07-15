@@ -14,16 +14,52 @@ export function TaskList() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTaskTitle, setNewTaskTitle] = useState('');
 
+  function isValidId(id: number) {
+    const idsAlreadyInUse = tasks.map(task => task.id)
+    const idIsInUse = idsAlreadyInUse.includes(id)
+    const idIsValid = !idIsInUse
+
+    return idIsValid
+  }
+
+  function generateId(iteration = 0, maxIterations = 100): number {
+    if (iteration === maxIterations) throw new Error("Max iterations achieved in generateId. ")
+
+    const id = Math.round(Math.random() * 1000)
+    return isValidId(id) ? id : generateId(iteration+1)
+  }
+
+  function titleIsEmpty() {
+    return newTaskTitle.trim() === ''
+  }
+
   function handleCreateNewTask() {
     // Crie uma nova task com um id random, não permita criar caso o título seja vazio.
+    if (titleIsEmpty()) {
+
+    } else {
+      const newTaskId = generateId()
+      
+      setTasks([...tasks, {
+        id: newTaskId,
+        isComplete: false,
+        title: newTaskTitle
+      }])
+    }
   }
 
   function handleToggleTaskCompletion(id: number) {
     // Altere entre `true` ou `false` o campo `isComplete` de uma task com dado ID
+    const taskToToggleIsComplete = tasks.find(task => task.id === id)
+
+    if (taskToToggleIsComplete) {
+      setTasks([...tasks.filter(task => task.id !== id), {...taskToToggleIsComplete, isComplete: !taskToToggleIsComplete.isComplete}])
+    }
   }
 
   function handleRemoveTask(id: number) {
     // Remova uma task da listagem pelo ID
+    setTasks(tasks.filter(task => task.id !== id))
   }
 
   return (
